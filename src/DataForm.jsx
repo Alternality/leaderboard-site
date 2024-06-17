@@ -68,9 +68,18 @@ function Leaderboard() {
         setSelectedMode(prevMode => prevMode === 'survival' ? 'timeAttack' : 'survival');
     };
 
+    const formatDateTime = (dateTimeString) => {
+        const options = {
+            year: 'numeric', month: 'numeric', day: 'numeric',
+            hour: 'numeric', minute: 'numeric', second: 'numeric',
+            hour12: true // Use 12-hour format with AM/PM
+        };
+        return new Date(dateTimeString).toLocaleString(undefined, options);
+    };
+
     return (
         <div style={styles.container}>
-            <h2 style={styles.heading}>Leaderboard</h2>
+            <h2 style={styles.heading}>ShakeSafe Leaderboard</h2>
             <button
                 style={{ ...styles.button, ...(selectedMode === 'survival' ? styles.activeButton : {}) }}
                 onClick={toggleMode}
@@ -83,7 +92,7 @@ function Leaderboard() {
                     <h3 style={styles.heading}>{selectedMode === 'survival' ? 'Survival Leaderboard' : 'Time Attack Leaderboard'}</h3>
                     {leaderboardData.map((entry, index) => (
                         <div key={index} style={styles.leaderboardItem}>
-                            {index + 1}. {entry.user} - {selectedMode === 'survival' ? (entry.survival ? entry.survival.score : 'N/A') : (entry.timeAttack ? entry.timeAttack.score : 'N/A')}
+                            {index + 1}. {entry.user} - Score: {selectedMode === 'survival' ? entry.survival.score : entry.timeAttack.score}, Time: {selectedMode === 'survival' ? entry.survival.time : entry.timeAttack.time}, Date: {formatDateTime(entry.date)}
                         </div>
                     ))}
                 </div>
