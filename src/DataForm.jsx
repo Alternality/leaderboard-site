@@ -2,9 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 function Leaderboard() {
-    const [selectedMode, setSelectedMode] = useState(null);
+    const [selectedMode, setSelectedMode] = useState('survival'); // Default mode is 'survival'
     const [leaderboardData, setLeaderboardData] = useState(null);
-    const [buttonHovered, setButtonHovered] = useState(null); // Track which button is hovered
 
     useEffect(() => {
         const fetchLeaderboardData = async () => {
@@ -16,9 +15,7 @@ function Leaderboard() {
             }
         };
 
-        if (selectedMode) {
-            fetchLeaderboardData();
-        }
+        fetchLeaderboardData(); // Fetch data initially and whenever selectedMode changes
     }, [selectedMode]);
 
     const styles = {
@@ -35,10 +32,6 @@ function Leaderboard() {
             fontSize: '2em',
             marginBottom: '10px'
         },
-        paragraph: {
-            fontSize: '1.2em',
-            marginBottom: '20px'
-        },
         button: {
             backgroundColor: '#1f1f1f',
             color: '#ffffff',
@@ -48,16 +41,11 @@ function Leaderboard() {
             fontSize: '1em',
             cursor: 'pointer',
             transition: 'background-color 0.3s, color 0.3s',
-            margin: '10px',
-            // Conditional style based on hover
-            ...(buttonHovered === 'survival' && selectedMode !== 'survival' && {
-                backgroundColor: '#ffffff',
-                color: '#000000'
-            }),
-            ...(buttonHovered === 'timeAttack' && selectedMode !== 'timeAttack' && {
-                backgroundColor: '#ffffff',
-                color: '#000000'
-            }),
+            margin: '10px'
+        },
+        activeButton: {
+            backgroundColor: '#ffffff',
+            color: '#000000'
         },
         leaderboard: {
             marginTop: '20px',
@@ -69,43 +57,25 @@ function Leaderboard() {
         }
     };
 
-    const handleModeSelect = (mode) => {
-        setSelectedMode(mode);
-    };
-
-    const handleMouseOver = (mode) => {
-        setButtonHovered(mode);
-    };
-
-    const handleMouseOut = () => {
-        setButtonHovered(null);
+    const toggleMode = () => {
+        setSelectedMode(prevMode => prevMode === 'survival' ? 'timeAttack' : 'survival');
     };
 
     return (
         <div style={styles.container}>
-            <h2 style={styles.heading}>Game Modes</h2>
+            <h2 style={styles.heading}>Leaderboard</h2>
             <button
-                style={styles.button}
-                onMouseOver={() => handleMouseOver('survival')}
-                onMouseOut={handleMouseOut}
-                onClick={() => handleModeSelect('survival')}
+                style={{ ...styles.button, ...(selectedMode === 'survival' ? styles.activeButton : {}) }}
+                onClick={toggleMode}
             >
-                Survival
+                {selectedMode === 'survival' ? 'Switch to Time Attack' : 'Switch to Survival'}
             </button>
-            <button
-                style={styles.button}
-                onMouseOver={() => handleMouseOver('timeAttack')}
-                onMouseOut={handleMouseOut}
-                onClick={() => handleModeSelect('timeAttack')}
-            >
-                Time Attack
-            </button>
-            {selectedMode && leaderboardData && (
+            {leaderboardData && (
                 <div style={styles.leaderboard}>
                     <h3 style={styles.heading}>{selectedMode === 'survival' ? 'Survival Leaderboard' : 'Time Attack Leaderboard'}</h3>
                     {leaderboardData.map((entry, index) => (
                         <div key={index} style={styles.leaderboardItem}>
-                            {index + 1}. {entry.user} - {entry.score}
+                            {index + 1}. {entry.user} - {selectedMode === 'survival' ? entry.survival.score : entry.timeAttack.score}
                         </div>
                     ))}
                 </div>
