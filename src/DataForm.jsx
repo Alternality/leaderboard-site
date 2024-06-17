@@ -4,18 +4,21 @@ import axios from "axios";
 function Leaderboard() {
     const [selectedMode, setSelectedMode] = useState('survival'); // Default mode is 'survival'
     const [leaderboardData, setLeaderboardData] = useState(null);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchLeaderboardData = async () => {
             try {
                 const response = await axios.get(`https://leaderboard-api-shakesafe.netlify.app/.netlify/functions/api/${selectedMode}`);
                 setLeaderboardData(response.data);
+                setError(null); // Clear any previous error
             } catch (error) {
                 console.error('Error fetching leaderboard data:', error.message);
+                setError('Error fetching data. Please try again later.');
             }
         };
 
-        fetchLeaderboardData(); // Fetch data initially and whenever selectedMode changes
+        fetchLeaderboardData();
     }, [selectedMode]);
 
     const styles = {
@@ -54,6 +57,10 @@ function Leaderboard() {
         leaderboardItem: {
             padding: '10px',
             borderBottom: '1px solid #444'
+        },
+        error: {
+            color: 'red',
+            marginTop: '10px'
         }
     };
 
@@ -70,14 +77,20 @@ function Leaderboard() {
             >
                 {selectedMode === 'survival' ? 'Switch to Time Attack' : 'Switch to Survival'}
             </button>
-            {leaderboardData && (
+            {error && <div style={styles.error}>{error}</div>}
+            {leaderboardData && leaderboardData.length > 0 ? (
                 <div style={styles.leaderboard}>
                     <h3 style={styles.heading}>{selectedMode === 'survival' ? 'Survival Leaderboard' : 'Time Attack Leaderboard'}</h3>
                     {leaderboardData.map((entry, index) => (
                         <div key={index} style={styles.leaderboardItem}>
-                            {index + 1}. {entry.user} - {selectedMode === 'survival' ? entry.survival.score : entry.timeAttack.score}
+                            {index + 1}. {entry.user} - {selectedMode === 'survival' ? (entry.survival ? entry.survival.score : 'N/A') : (entry.timeAttack ? entry.timeAttack.score : 'N/A')}
                         </div>
                     ))}
+                </div>
+            ) : (
+                <div style={styles.leaderboard}>
+                    <h3 style={styles.heading}>{selectedMode === 'survival' ? 'Survival Leaderboard' : 'Time Attack Leaderboard'}</h3>
+                    <p>No leaderboard data available.</p>
                 </div>
             )}
         </div>
